@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # 'django-insecure-%4gbntb)_a(%n+urf#(5w+jvotjj)^)cr%q=+$9o*@lumopw(_'
 
-DEBUG = 'False'
+DEBUG = os.getenv('DEBUG', '') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
