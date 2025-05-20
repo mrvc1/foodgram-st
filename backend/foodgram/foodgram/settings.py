@@ -1,14 +1,21 @@
 from pathlib import Path
 import os
 
+from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = 'django-insecure-%4gbntb)_a(%n+urf#(5w+jvotjj)^)cr%q=+$9o*@lumopw(_'
+SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-DEBUG = True
+# 'django-insecure-%4gbntb)_a(%n+urf#(5w+jvotjj)^)cr%q=+$9o*@lumopw(_'
 
-ALLOWED_HOSTS = []
+DEBUG = 'False'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 INSTALLED_APPS = [
