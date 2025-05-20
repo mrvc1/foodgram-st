@@ -1,5 +1,3 @@
-version: '3.3'
-
 volumes:
   pg_data:
   static:
@@ -24,7 +22,9 @@ services:
 
   frontend:
     env_file: ../.env
-    build: ../frontend/
+    build:
+      context: ../frontend/
+      dockerfile: Dockerfile
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
