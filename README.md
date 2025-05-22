@@ -3,7 +3,8 @@
 ``` https://github.com/mrvc1/foodgram-st.git ```
 
 
-### Для ревьюера .env
+### Для ревьюера:
+Создать файл .env в папке foodgram-st/
 ```
 POSTGRES_DB=foodgram
 POSTGRES_USER=timur
