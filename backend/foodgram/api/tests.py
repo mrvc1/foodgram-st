@@ -16,7 +16,7 @@ class RecipeViewSetTestCase(TestCase):
         self.auth_client.login(username='testuser', password='pass')
         self.ingredient = Ingredient.objects.create(name='Тестовый ингредиент',
                                                     measurement_unit='г')
-        self.recipe = Recipe.objects.create(title='Тестовый рецепт',
+        self.recipe = Recipe.objects.create(name='Тестовый рецепт',
                                             author=self.user)
         RecipeIngredientValue.objects.create(
             recipe=self.recipe,
@@ -33,19 +33,19 @@ class RecipeViewSetTestCase(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_recipe_creation_unauth(self):
-        data = {'title': 'NoAuth Recipe'}
+        data = {'name': 'NoAuth Recipe'}
         response = self.guest_client.post('/api/recipes/', data)
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_recipe_partial_update(self):
-        data = {'title': 'Updated Title'}
+        data = {'name': 'Updated name'}
         response = self.auth_client.patch(
             f'/api/recipes/{self.recipe.id}/', data,
             content_type='application/json'
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.recipe.refresh_from_db()
-        self.assertEqual(self.recipe.title, 'Updated Title')
+        self.assertEqual(self.recipe.name, 'Updated name')
 
     def test_get_link(self):
         response = self.guest_client.get(
@@ -91,7 +91,7 @@ class FavouritesViewSetTestCase(TestCase):
         self.auth_client.login(username='favuser', password='pass')
         self.ingredient = Ingredient.objects.create(name='соль',
                                                     measurement_unit='г')
-        self.recipe = Recipe.objects.create(title='Fav Recipe',
+        self.recipe = Recipe.objects.create(name='Fav Recipe',
                                             author=self.user)
         RecipeIngredientValue.objects.create(
             recipe=self.recipe,
