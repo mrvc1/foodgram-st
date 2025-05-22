@@ -3,7 +3,8 @@
 ``` https://github.com/mrvc1/foodgram-st.git ```
 
 
-### Для ревьюера .env
+### Для ревьюера:
+Создать файл .env в папке foodgram-st/
 ```
 POSTGRES_DB=foodgram
 POSTGRES_USER=timur
@@ -15,18 +16,10 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
 ```
 
-### В директории проекта на примере .env по образцу:
-```
-POSTGRES_DB=foodgram
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-DB_HOST=db
-DB_PORT=5432
-SECRET_KEY=50 character random string
-ALLOWED_HOSTS=localhost,127.0.0.1
-DEBUG=False
-```
+### Перейти в папку infra/ и запустить команду:
+```docker compose up --build```
 
+## Если какие-то проблемы:
 ### Перейти в папку Infra:
 ``` cd infra/ ```
 
