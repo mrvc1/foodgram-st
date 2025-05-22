@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
+from hashids import Hashids
 
 from .pagination import CustomPagination
 from api.permissions import IsOwnerOrReadOnly
@@ -13,8 +13,6 @@ from api.serializers import (FavouriteSerializer, IngredientSerializer,
                              RecipeReadSerializer, RecipeWriteSerializer)
 from recipes.models import (Favourite, Ingredient, Recipe,
                             RecipeIngredientValue)
-from shortener.models import LinkMapped
-from shortener.serializers import ShortenerSerializer
 
 User = get_user_model()
 
@@ -81,15 +79,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.AllowAny],
     )
     def get_link(self, request, pk=None):
-        """Получить короткую ссылку на рецепт через модель LinkMapped."""
+        """Получить короткую ссылку на рецепт."""
 
         recipe = self.get_object()
-        original_url = request.build_absolute_uri(
-            reverse('recipe-detail', args=[recipe.pk])
+        hashids = Hashids(salt="your_secret_salt", min_length=6)
+        hashed_id = hashids.encode(recipe.id)
+
+        base_url = request.build_absolute_uri('/')
+        short_link = f"{base_url}s/{hashed_id}"
+
+        return Response(
+            {"short-link": short_link},
+            status=status.HTTP_200_OK
         )
-        link, _ = LinkMapped.objects.get_or_create(original_url=original_url)
-        serializer = ShortenerSerializer(link, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,
