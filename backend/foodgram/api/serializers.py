@@ -5,11 +5,9 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework.relations import PrimaryKeyRelatedField
-from rest_framework.reverse import reverse
 from api.utils import create_relation_ingredient_and_value
 from recipes.models import Favourite, Ingredient, Recipe, RecipeIngredientValue
 from cart.models import Cart
-from shortener.models import LinkMapped
 
 
 MIN_COOKING_TIME = MIN_AMOUNT = 1
@@ -227,25 +225,3 @@ class FavouriteSerializer(serializers.ModelSerializer):
             'id', 'name', 'image', 'cooking_time',
         )
         read_only_fields = ('__all__',)
-
-
-class ShortenerSerializer(serializers.ModelSerializer):
-    """Сериализатор коротких ссылок"""
-
-    class Meta:
-        model = LinkMapped
-        fields = ('original_url',)
-        write_only_fields = ('original_url',)
-
-    def get_short_link(self, obj):
-        request = self.context.get('request')
-        return request.build_absolute_uri(
-            reverse('shortener:load_url', args=[obj.url_hash])
-        )
-
-    def create(self, validated_data):
-        instance, _ = LinkMapped.objects.get_or_create(**validated_data)
-        return instance
-
-    def to_representation(self, instance):
-        return {'short-link': self.get_short_link(instance)}
