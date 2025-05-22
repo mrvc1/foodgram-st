@@ -17,7 +17,8 @@ class RecipeViewSetTestCase(TestCase):
         self.ingredient = Ingredient.objects.create(name='Тестовый ингредиент',
                                                     measurement_unit='г')
         self.recipe = Recipe.objects.create(name='Тестовый рецепт',
-                                            author=self.user)
+                                            author=self.user,
+                                            cooking_time=10)
         RecipeIngredientValue.objects.create(
             recipe=self.recipe,
             ingredient=self.ingredient,
@@ -92,7 +93,9 @@ class FavouritesViewSetTestCase(TestCase):
         self.ingredient = Ingredient.objects.create(name='соль',
                                                     measurement_unit='г')
         self.recipe = Recipe.objects.create(name='Fav Recipe',
-                                            author=self.user)
+                                            author=self.user,
+                                            cooking_time=10,
+                                            )
         RecipeIngredientValue.objects.create(
             recipe=self.recipe,
             ingredient=self.ingredient,
