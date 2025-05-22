@@ -16,6 +16,10 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
 ```
 
+### Перейти в папку infra/ и запустить команду:
+```docker compose up --build```
+
+
 ### В директории проекта на примере .env по образцу:
 ```
 POSTGRES_DB=foodgram
