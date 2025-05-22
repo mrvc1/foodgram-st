@@ -1,12 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.http.response import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
 from hashids import Hashids
-from django.views import View
 
 from .pagination import CustomPagination
 from api.permissions import IsOwnerOrReadOnly
@@ -174,19 +173,3 @@ class FavouritesViewSet(generics.CreateAPIView, generics.DestroyAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class RedirectToRecipeView(View):
-    """Перенаправляет пользователя на страницу рецепта по короткой ссылке."""
-
-    def get(self, request, hashed_id):
-        hashids = Hashids(salt="your_secret_salt", min_length=6)
-        decoded_id = hashids.decode(hashed_id)
-
-        if not decoded_id:
-            return redirect('404')
-
-        recipe_id = decoded_id[0]
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-
-        return redirect(f'/api/recipes/{recipe.id}/')
