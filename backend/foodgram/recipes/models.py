@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.forms import ValidationError
 
 MIN_COOKING_TIME = MIN_AMOUNT = 1
 MAX_COOKING_TIME = MAX_AMOUNT = 32_000
@@ -116,13 +115,6 @@ class RecipeIngredientValue(models.Model):
             MaxValueValidator(MAX_AMOUNT)
         ]
     )
-
-    def clean(self):
-        if self.amount < MIN_AMOUNT or self.amount > MAX_AMOUNT:
-            raise ValidationError(
-                f'Количество должно быть от {MIN_AMOUNT} до {MAX_AMOUNT}.'
-            )
-        super().clean()
 
     class Meta:
         verbose_name = 'Рецепты - ингредиенты'

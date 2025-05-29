@@ -7,7 +7,6 @@ from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework.relations import PrimaryKeyRelatedField
 from api.utils import create_relation_ingredient_and_value
 from recipes.models import Favourite, Ingredient, Recipe, RecipeIngredientValue
-from cart.models import Cart
 
 
 MIN_COOKING_TIME = MIN_AMOUNT = 1
@@ -88,11 +87,26 @@ class UserSerializer(serializers.ModelSerializer):
         return user.following.filter(following=obj).exists()
 
 
+class RecipeIngredientValueSerializer(serializers.ModelSerializer):
+    """Сериализатор для ингредиентов в составе рецепта."""
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        model = RecipeIngredientValue
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра списка рецептов или рецепта."""
 
     author = UserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientValueSerializer(
+        source='ingredient_values', many=True, read_only=True
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -105,35 +119,19 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('__all__',)
 
-    def get_ingredients(self, obj):
-        """Получение поля ингредиентов с количеством."""
-        ingredients = RecipeIngredientValue.objects.filter(
-            recipe=obj
-        ).select_related('ingredient')
-
-        return [
-            {
-                'id': item.ingredient.id,
-                'name': item.ingredient.name,
-                'measurement_unit': item.ingredient.measurement_unit,
-                'amount': item.amount
-            }
-            for item in ingredients
-        ]
-
     def get_is_favorited(self, obj):
         """Проверка, находится ли рецепт в избранном."""
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Favourite.objects.filter(user=user, recipe=obj).exists()
+        return user.fav_recipes.filter(recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка, находится ли рецепт в корзине."""
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Cart.objects.filter(user=user, recipe=obj).exists()
+        return user.cart.filter(recipe=obj).exists()
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -145,7 +143,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         min_value=MIN_COOKING_TIME, max_value=MAX_COOKING_TIME
     )
     text = serializers.CharField(required=True, allow_blank=False)
-    name = serializers.CharField(required=True, allow_blank=False)
+    name = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        max_length=256
+    )
 
     class Meta:
         model = Recipe
@@ -179,13 +181,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             )
 
         return attrs
-
-    def validate_name(self, value):
-        if len(value) > 256:
-            raise ValidationError(
-                'Длина поля "name" не должна превышать 256 символов.'
-            )
-        return value
 
     def create(self, validated_data):
         """Создание рецепта."""

@@ -6,10 +6,9 @@ from rest_framework.response import Response
 from api.pagination import CustomPagination
 
 from api.serializers import UserSerializer
-from users.models import UserFollow
 from users.serializers import (ChangePasswordSerializer, UserCreateSerializer,
-                               UserSubscriptionsSerializer)
-from .serializers import AvatarSerializer
+                               UserSubscriptionsSerializer, AvatarSerializer,
+                               SubscriptionCreateSerializer)
 
 User = get_user_model()
 
@@ -65,27 +64,25 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @subscribe.mapping.post
     def subscribe_post(self, request, pk=None):
-        """Подписаться на пользователя."""
-        user = request.user
         author = get_object_or_404(User, id=pk)
-
-        if user == author:
-            return Response({'detail': 'Нельзя подписаться на самого себя!'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        if UserFollow.objects.filter(user=user, following=author).exists():
-            return Response({'detail': 'Подписка уже оформлена!'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        UserFollow.objects.create(user=user, following=author)
-
-        recipes_limit = request.query_params.get('recipes_limit')
-
-        serializer = UserSubscriptionsSerializer(
-            author, context={'request': request,
-                             'recipes_limit': recipes_limit}
+        serializer = SubscriptionCreateSerializer(
+            data={'following': author.id},
+            context={'request': request}
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        recipes_limit = request.query_params.get('recipes_limit')
+        response_serializer = UserSubscriptionsSerializer(
+            author,
+            context={
+                'request': request,
+                'recipes_limit': recipes_limit
+            }
+        )
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     @subscribe.mapping.delete
     def subscribe_delete(self, request, pk=None):
@@ -93,8 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         author = get_object_or_404(User, id=pk)
 
-        deleted, _ = UserFollow.objects.filter(user=user,
-                                               following=author).delete()
+        deleted, _ = user.following.filter(following=author).delete()
         if not deleted:
             return Response({'detail': 'Подписка не найдена.'},
                             status=status.HTTP_400_BAD_REQUEST)

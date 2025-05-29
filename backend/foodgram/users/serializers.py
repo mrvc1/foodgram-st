@@ -129,8 +129,30 @@ class UserSubscriptionsSerializer(serializers.ModelSerializer):
         user = request.user if request else None
 
         if user and not user.is_anonymous:
-            return UserFollow.objects.filter(user=user, following=obj).exists()
+            return user.following.filter(following=obj).exists()
         return False
+
+
+class SubscriptionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFollow
+        fields = ('user', 'following')
+        read_only_fields = ('user',)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        following = data['following']
+        if user == following:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя!'
+            )
+        if user.following.filter(following=following).exists():
+            raise serializers.ValidationError('Подписка уже оформлена!')
+        return data
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class ChangePasswordSerializer(serializers.ModelSerializer):

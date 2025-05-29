@@ -65,14 +65,6 @@ class User(AbstractUser):
             or self.is_staff
         )
 
-    def clean(self):
-        if not self.email:
-            raise ValidationError('Поле "email" обязательно для заполнения.')
-        if not self.username:
-            raise ValidationError(
-                'Поле "username" обязательно для заполнения.')
-        super().clean()
-
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -84,6 +76,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def clean(self):
+        if not self.email:
+            raise ValidationError('Поле "email" обязательно для заполнения.')
+        if not self.username:
+            raise ValidationError(
+                'Поле "username" обязательно для заполнения.')
+        super().clean()
 
 
 class UserFollow(models.Model):
@@ -102,6 +102,7 @@ class UserFollow(models.Model):
     class Meta:
         verbose_name = 'Подписки'
         verbose_name_plural = 'Подписки'
+        ordering = ['user', 'following']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'following'],
@@ -109,13 +110,12 @@ class UserFollow(models.Model):
             ),
         ]
 
+    def __str__(self):
+        return f'{self.user} подписан на {self.following}'
+
     def save(self, *args, **kwargs):
         if self.user == self.following:
             raise ValidationError('Нельзя подписываться на самого себя!')
-        if UserFollow.objects.filter(user=self.user,
-                                     following=self.following).exists():
+        if self.user.following.filter(following=self.following).exists():
             raise ValidationError('Подписка уже существует.')
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.user} подписан на {self.following}'
