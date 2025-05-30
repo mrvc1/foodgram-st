@@ -16,6 +16,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
 ```
 # Обязательно выполнить следующие команды (без них не загрузятся ингредиенты, а без них не пройдут тесты коллекции postman_collection):
+# ```docker compose exec backend python manage.py load_ingredients``` для загрузки ингредиентов. Без них не пройдут тесты!!!!!!!!!!!!!!
 ### Перейти в папку infra/ и запустить команду:
 ```
 docker compose up --build
