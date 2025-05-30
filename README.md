@@ -15,7 +15,7 @@ SECRET_KEY=50 character random string
 ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
 ```
-
+# Обязательно выполнить следующие команды (без них не загрузятся ингредиенты, а без них не пройдут тесты коллекции postman_collection):
 ### Перейти в папку infra/ и запустить команду:
 ```
 docker compose up --build
