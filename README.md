@@ -17,13 +17,6 @@ DEBUG=False
 ```
 
 ### Перейти в папку infra/ и запустить команду:
-```docker compose up --build```
-
-## Если какие-то проблемы:
-### Перейти в папку Infra:
-``` cd infra/ ```
-
-### Запустить проект с помощью Docker:
 ```
 docker compose up --build
 docker compose exec backend python manage.py makemigrations
