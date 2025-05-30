@@ -15,16 +15,14 @@ SECRET_KEY=50 character random string
 ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
 ```
-# Обязательно выполнить следующие команды (без них не загрузятся ингредиенты, а без них не пройдут тесты коллекции postman_collection):
-# ```docker compose exec backend python manage.py load_ingredients``` для загрузки ингредиентов. Без них не пройдут тесты!!!!!!!!!!!!!!
-### Перейти в папку infra/ и запустить команду:
+
+### Перейти в папку infra/ и запустить команду (автоматически добавит ингредиенты, которые нужны для тестов):
 ```
 docker compose up --build
-docker compose exec backend python manage.py makemigrations
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py collectstatic
-docker compose exec backend ls /backend_static/static
-docker compose exec backend python manage.py load_ingredients
+```
+
+### По желанию можно создать суперпользователя:
+```
 docker compose exec backend python manage.py createsuperuser
 ```
 
